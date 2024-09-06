@@ -2,6 +2,9 @@
 # Date: 2024
 # Github: https://github.com/masterking32
 
+import argparse
+import os
+
 import asyncio
 import datetime
 import json
@@ -12,24 +15,28 @@ import requests
 from colorlog import ColoredFormatter
 import uuid
 import hashlib
-from utilities import *
-from promogames import *
 
-try:
-    from config import *
-except ImportError:
+# 解析命令行传递的 config.py 文件路径
+parser = argparse.ArgumentParser(description="Pass config.py file path.")
+parser.add_argument("--config", type=str, required=True, help="Path to config.py file.")
+args = parser.parse_args()
+
+# 加载指定的 config.py 文件
+if not os.path.exists(args.config):
     print("Config file not found.")
-    print("Create a copy of config.py.example and rename it to config.py")
-    print("And fill in the required fields.")
+    print("Please provide a valid path to config.py")
     exit()
 
-if "ConfigFileVersion" not in locals() or ConfigFileVersion != 1:
+# 动态执行 config.py 文件中的内容
+with open(args.config, 'r') as f:
+    exec(f.read(), globals())
+
+# 验证 config_file_version
+if "ConfigFileVersion" not in globals() or ConfigFileVersion != 1:
     print("Invalid config file version.")
     print("Please update the config file to the latest version.")
-    print("Create a copy of config.py.example and rename it to config.py")
-    print("And fill in the required fields.")
     exit()
-
+    
 # ---------------------------------------------#
 # Logging configuration
 LOG_LEVEL = logging.DEBUG
