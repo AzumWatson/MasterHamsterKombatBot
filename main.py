@@ -2,9 +2,6 @@
 # Date: 2024
 # Github: https://github.com/masterking32
 
-import argparse
-import os
-
 import asyncio
 import datetime
 import json
@@ -15,23 +12,25 @@ import requests
 from colorlog import ColoredFormatter
 import uuid
 import hashlib
+from utilities import *
+from promogames import *
 
-# 解析命令行传递的 config.py 文件路径
-parser = argparse.ArgumentParser(description="Pass config.py file path.")
-parser.add_argument("--config", type=str, required=True, help="Path to config.py file.")
+import argparse
+
+# 命令行参数，指定不同的配置文件
+parser = argparse.ArgumentParser(description="Run the project with different config files.")
+parser.add_argument('--config', type=str, required=True, help="Path to the config.py file")
 args = parser.parse_args()
 
-# 加载指定的 config.py 文件
-if not os.path.exists(args.config):
+# 动态加载指定的配置文件为全局变量
+config_file_path = args.config
+try:
+    with open(config_file_path) as config_file:
+        exec(config_file.read(), globals())  # 将配置内容加载为全局变量
+except FileNotFoundError:
     print("Config file not found.")
-    print("Please provide a valid path to config.py")
     exit()
 
-# 动态执行 config.py 文件中的内容
-with open(args.config, 'r') as f:
-    exec(f.read(), globals())
-
-# 验证 config_file_version
 if "ConfigFileVersion" not in globals() or ConfigFileVersion != 1:
     print("Invalid config file version.")
     print("Please update the config file to the latest version.")
